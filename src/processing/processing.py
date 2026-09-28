@@ -78,24 +78,19 @@ class ProcessingBase():
         Implementation should save all the required information in class 
         variables in order to be able to plot the results
         """
-        path = expanduser("~") + sep + ".bento" + sep
-        profilePaths = [path, ""]
         self.behaviors = {}
-        for path in profilePaths:
-            try:
-                fn = path + 'color_profiles.txt'
-                with open(fn,'r') as f:
+        fn = self.bento.color_profiles_path
+        try:
+            with open(fn,'r') as f:
+                line = f.readline()
+                while line:
+                    hot_key, name, r, g, b = line.strip().split(' ')
+                    if hot_key == '_':
+                        hot_key = ''
+                    self.behaviors[name] = [float(r), float(g), float(b)]
                     line = f.readline()
-                    while line:
-                        hot_key, name, r, g, b = line.strip().split(' ')
-                        if hot_key == '_':
-                            hot_key = ''
-                        self.behaviors[name] = [float(r), float(g), float(b)]
-                        line = f.readline()
-                break   # no exception, so success
-            except Exception as e:
-                print(f"Exception caught: {e}")
-                continue
+        except Exception as e:
+            print(f"Exception caught: {e}")
 
 
     def invokeUI(self) -> QFrame:

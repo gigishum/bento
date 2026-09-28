@@ -26,7 +26,7 @@ from db.bento_xls import import_bento_xls_file
 from neural.neuralFrame import NeuralFrame
 from pose.pose import PoseRegistry
 from channelDialog import ChannelDialog
-from os.path import expanduser, isabs, sep, relpath, splitext
+from os.path import abspath, dirname, expanduser, isabs, join, sep, relpath, splitext
 from dataExporter import DataExporter
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.file import Subject
@@ -112,6 +112,9 @@ class Bento(QObject, DataExporter):
         self.behaviors = Behaviors()
         self.pending_bout = None
         self.bento_dir = expanduser("~") + sep + ".bento" + sep
+        # Behavior definitions live in the BENTO folder itself (the parent of src/),
+        # not in the user's home directory.
+        self.color_profiles_path = join(dirname(dirname(abspath(__file__))), "color_profiles.txt")
         self.loadBehaviors()
         self.behaviorsDialog = BehaviorsDialog(self)
         self.behaviorsDialog.show()
@@ -233,21 +236,17 @@ class Bento(QObject, DataExporter):
         self.active_channel_changed.emit(self.active_channels[0])
 
     def loadBehaviors(self):
-        profile_paths = [self.bento_dir, ""]
-        for path in profile_paths:
-            try:
-                fn = path + 'color_profiles.txt'
-                print(f"Trying to load behavior definitions from {fn}...")
-                with open(fn,'r') as f:
-                    self.behaviors.load(f)
-                print("  Success!")
-                break   # no exception, so success
-            except Exception as e:
-                print(f"Exception caught: {e}")
-                continue
+        fn = self.color_profiles_path
+        print(f"Trying to load behavior definitions from {fn}...")
+        try:
+            with open(fn,'r') as f:
+                self.behaviors.load(f)
+            print("  Success!")
+        except Exception as e:
+            print(f"Exception caught: {e}")
 
     def saveBehaviors(self):
-        fn = self.bento_dir + "color_profiles.txt"
+        fn = self.color_profiles_path
         try:
             with open(fn, 'w') as f:
                 self.behaviors.save(f)
