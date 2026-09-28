@@ -242,10 +242,21 @@ class BehaviorsDialog(QDialog):
     def quit(self):
         self.done(0)
 
+    def closeEvent(self, event):
+        """
+        Hide the window when the user clicks the title bar's close ('X') button.
+        QDialog's default closeEvent calls reject(), which is overridden above to
+        do nothing, so without this the window would never close.
+        Windows -> Show/Hide Behavior List brings it back.
+        """
+        self.savedGeometry = self.saveGeometry()
+        self.hide()
+        event.accept()
+
     @Slot()
     def toggleVisibility(self):
         if self.isVisible():
-            self.geometry = self.saveGeometry()
-        else:
-            self.restoreGeometry(self.geometry)
+            self.savedGeometry = self.saveGeometry()
+        elif getattr(self, 'savedGeometry', None) is not None:
+            self.restoreGeometry(self.savedGeometry)
         self.setVisible(not self.isVisible())
