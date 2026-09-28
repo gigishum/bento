@@ -1,8 +1,8 @@
 # bentoConfig.py
 
 from getpass import getuser
-from os.path import expanduser, exists, sep
-from os import makedirs
+from os.path import exists
+from db.bentoPaths import BENTO_DIR, CONFIG_PATH
 import json
 from cryptography.fernet import Fernet
 
@@ -16,14 +16,12 @@ class BentoConfig(object):
         self._password = ""
         self._host = ""
         self._port = "3307"
-        self.bento_dir = expanduser("~") + sep + '.bento' + sep
-        self.config_path = self.bento_dir + 'config.json'
+        self.bento_dir = BENTO_DIR
+        self.config_path = CONFIG_PATH
         self._investigator_id = None
 
     def write(self):
         print(f"BentoConfig.write: writing to path {self.config_path}")
-        if not exists(self.config_path):
-            makedirs(self.bento_dir, exist_ok=True)
         with open(self.config_path, 'w') as file:
             config = {
                 'usePrivateDB': self._usePrivateDB,
@@ -37,7 +35,7 @@ class BentoConfig(object):
 
     def read(self):
         if exists(self.config_path):
-            with open(self.bento_dir + 'config.json') as file:
+            with open(self.config_path) as file:
                 config = json.load(file)
             self._usePrivateDB = config.get('usePrivateDB')
             self._username = config.get('username')

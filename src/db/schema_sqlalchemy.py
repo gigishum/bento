@@ -9,7 +9,8 @@ from sqlalchemy import Column, Date, Enum, Float, ForeignKey, Integer, String, T
 from sqlalchemy.orm import relationship, sessionmaker
 from datetime import date, datetime
 import enum
-from os.path import expanduser, exists, sep
+from os.path import exists
+from db.bentoPaths import DB_PATH
 
 Base = declarative_base()
 
@@ -548,7 +549,7 @@ class Surgery(Base):
 def new_session(username, password, host, port, use_personal_db=False):
     need_to_create_tables = False
     if use_personal_db:
-        bento_db_file = expanduser("~") + sep + '.bento' + sep + "bento.db"
+        bento_db_file = DB_PATH
         if not exists(bento_db_file):
             need_to_create_tables = True    # but only after SqlAlchemy creates the file
         bento_engine = create_engine(f"sqlite:///" + bento_db_file)

@@ -20,13 +20,14 @@ from db.cameraDialog import CameraDialog
 from db.configDialog import ConfigDialog
 from db.setInvestigatorDialog import SetInvestigatorDialog
 from db.bentoConfig import BentoConfig
+from db.bentoPaths import BENTO_DIR, COLOR_PROFILES_PATH
 from db.animal_surgery_xls import import_animal_xls_file
 from db.behaviorsDialog import BehaviorsDialog
 from db.bento_xls import import_bento_xls_file
 from neural.neuralFrame import NeuralFrame
 from pose.pose import PoseRegistry
 from channelDialog import ChannelDialog
-from os.path import abspath, dirname, expanduser, isabs, join, sep, relpath, splitext
+from os.path import expanduser, isabs, sep, relpath, splitext
 from dataExporter import DataExporter
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.file import Subject
@@ -111,10 +112,8 @@ class Bento(QObject, DataExporter):
         self.current_annotations = [] # tuples ('ch_key', bout)
         self.behaviors = Behaviors()
         self.pending_bout = None
-        self.bento_dir = expanduser("~") + sep + ".bento" + sep
-        # Behavior definitions live in the BENTO folder itself (the parent of src/),
-        # not in the user's home directory.
-        self.color_profiles_path = join(dirname(dirname(abspath(__file__))), "color_profiles.txt")
+        self.bento_dir = BENTO_DIR
+        self.color_profiles_path = COLOR_PROFILES_PATH
         self.loadBehaviors()
         self.behaviorsDialog = BehaviorsDialog(self)
         self.behaviorsDialog.show()

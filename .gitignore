@@ -33,3 +33,6 @@ desktop.ini
 
 # Local env export files
 bento-frozen.yml
+
+# BENTO local config (contains the encrypted DB password)
+config.json
