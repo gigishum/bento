@@ -1,6 +1,35 @@
-*.pyc
+# BENTO-specific (from original repo)
 /.qt_for_python/
 /.vscode/
-.DS_Store
 timecode-1.3.1/
 timecode-1.3.1.tar
+
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# Conda
+*.conda
+.conda/
+
+# PyCharm
+.idea/
+
+# OS junk
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# BENTO runtime/data artifacts
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Local env export files
+bento-frozen.yml
