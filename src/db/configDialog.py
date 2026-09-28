@@ -3,7 +3,7 @@
 from db.schema_sqlalchemy import Camera
 from db.configDialog_ui import Ui_ConfigDialog
 from qtpy.QtCore import Signal, Slot
-from qtpy.QtWidgets import QDialog, QDialogButtonBox
+from qtpy.QtWidgets import QDialog, QDialogButtonBox, QMessageBox
 
 from db.schema_sqlalchemy import *
 
@@ -31,6 +31,14 @@ class ConfigDialog(QDialog):
 
     @Slot()
     def accept(self):
+        if not self.ui.usePrivateDBCheckBox.isChecked():
+            # a shared (MySQL) database needs a host and a numeric port
+            if not self.ui.hostLineEdit.text().strip() or not self.ui.portLineEdit.text().strip().isdigit():
+                QMessageBox.warning(self, "Host Config",
+                    "To use a shared database, enter its Host and a numeric Port.\n\n"
+                    "To keep your data in a local file (bento.db in the BENTO folder), "
+                    "tick \"Use private database\".")
+                return
         self.bento.config.setUsePrivateDB(self.ui.usePrivateDBCheckBox.isChecked())
         self.bento.config.setUsername(self.ui.usernameLineEdit.text())
         self.bento.config.setPassword(self.ui.passwordLineEdit.text())

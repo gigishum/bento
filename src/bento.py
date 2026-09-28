@@ -142,17 +142,22 @@ class Bento(QObject, DataExporter):
         self.set_time('0:0:0:0')
         if not goodConfig:
             self.edit_config()
-        try:
-            self.db_sessionMaker = new_session(
-                self.config.username(),
-                self.config.password(),
-                self.config.host(),
-                self.config.port(),
-                self.config.usePrivateDB())
-        except Exception as e:
-            print(f"Caught Exception {e}.  Probably config data invalid")
-            QMessageBox.about(self.mainWindow, "Error", f"Config data invalid.  {e}")
-            exit(-1)
+        while True:
+            try:
+                self.db_sessionMaker = new_session(
+                    self.config.username(),
+                    self.config.password(),
+                    self.config.host(),
+                    self.config.port(),
+                    self.config.usePrivateDB())
+                break
+            except Exception as e:
+                print(f"Caught Exception {e}.  Probably config data invalid")
+                QMessageBox.about(self.mainWindow, "Error",
+                    f"Config data invalid.  {e}\n\nPlease correct the database settings.")
+                # let the user fix the settings rather than exiting with a bad config.json
+                if not self.edit_config():
+                    exit(-1)
         if not self.config.investigator_id():
             with self.db_sessionMaker() as db_sess:
                 query = db_sess.query(Investigator).distinct()
@@ -390,7 +395,7 @@ class Bento(QObject, DataExporter):
     @Slot()
     def edit_config(self):
         dialog = ConfigDialog(self)
-        dialog.exec()
+        return dialog.exec()
 
     @Slot()
     def edit_animal(self):
