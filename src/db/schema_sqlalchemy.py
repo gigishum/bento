@@ -170,7 +170,7 @@ class VideoData(Base):
             'Video File Path': self.file_path,
             'Sample Rate': self.sample_rate,
             'Offset Time': self.offset_time,
-            'Camera Position': self.camera.position,
+            'Camera Position': self.camera.position if self.camera else None,
             'trial_id': self.trial,
             'pose_data': pose_data
             #TODO: camera?
@@ -180,9 +180,14 @@ class VideoData(Base):
         # only update fields that have changed to cut down on DB transactions
         if not set(d.keys()).issuperset(set(self.keys)):
             raise RuntimeError("Dict provided has incorrect or incomplete contents")
-        camera = db_sess.query(Camera).where(func.lower(Camera.position) == func.lower(d['Camera Position'])).scalar()
-        if not camera:
-            raise RuntimeError(f"No camera with position {d['Camera Position']}")
+        # Camera position is optional: videos whose file names don't contain a
+        # known camera position (e.g. "_Top") are stored without a camera.
+        camera = None
+        camera_position = d['Camera Position']
+        if camera_position:
+            camera = db_sess.query(Camera).where(func.lower(Camera.position) == func.lower(camera_position)).first()
+            if not camera:
+                raise RuntimeError(f"No camera with position {camera_position}")
         if 'id' in d.keys() and d['id'] and d['id'] != self.id:
             self.id = d['id']
         if 'Video File Path' in d.keys() and d['Video File Path'] != self.file_path:
@@ -191,10 +196,9 @@ class VideoData(Base):
             self.sample_rate = d['Sample Rate']
         if 'Offset Time' in d.keys() and d['Offset Time'] != self.offset_time:
             self.offset_time = d['Offset Time']
-        if self.camera_id != camera.id:
-            self.camera_id = camera.id
         if self.camera != camera:
             self.camera = camera
+            self.camera_id = camera.id if camera else None
         if 'trial_id' in d.keys() and d['trial_id'] != self.trial:
             self.trial = d['trial_id']
         #TODO: pose_data?
